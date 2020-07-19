@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: mc3
+  namespace: nginx-test
+  labels:
+    app: mc3
+spec:
+  replicas: 1 # start with 1
+  selector:
+    matchLabels:
+      app: mc3
+  template:
+    metadata:
+      labels:
+        app: mc3
+    spec:
+      containers:
+      - name: webapp
+        image: training/webapp
+        env:
+          - name: MY_POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+      - name: nginx
+        image: <imagename>
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: nginx-proxy-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+      volumes:
+      - name: nginx-proxy-config
+        configMap:
+          name: mc3-nginx-conf
